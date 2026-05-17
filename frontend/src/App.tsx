@@ -42,7 +42,9 @@ export default function App() {
 
   return (
     <>
-      <Navbar user={user} onNavigate={setPage} logout={handleLogout} showLinks={page === 'home'} />
+      {page !== 'research' && (
+        <Navbar user={user} onNavigate={setPage} logout={handleLogout} showLinks={page === 'home'} />
+      )}
       <AnimatePresence mode="wait">
         {page === 'home' ? (
           <motion.div key="home"
@@ -72,7 +74,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <ResearchPage user={user!} logout={handleLogout} />
+            <ResearchPage user={user!} logout={handleLogout} onNavigate={setPage} />
           </motion.div>
         )}
       </AnimatePresence>

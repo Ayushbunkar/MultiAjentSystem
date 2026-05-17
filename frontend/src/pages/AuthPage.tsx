@@ -53,7 +53,7 @@ export default function AuthPage({ onLoginLocal }: Props) {
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-sm"
       >
-        <div className="card p-10">
+        <div className="card p-6 sm:p-10">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-xl bg-sage/10 border border-sage/20 flex items-center justify-center text-sage">

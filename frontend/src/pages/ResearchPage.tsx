@@ -35,9 +35,9 @@ const badgeLbl: Record<StepStatus, string> = {
   idle:'Waiting', processing:'Processing…', complete:'Complete', error:'Failed',
 };
 
-type Props = { user: User; logout: ()=>void };
+type Props = { user: User; logout: ()=>void; onNavigate: (page: 'home' | 'research' | 'auth') => void };
 
-export default function ResearchPage({ user, logout }: Props) {
+export default function ResearchPage({ user, logout, onNavigate }: Props) {
   const { history, loadingHistory, addHistory, removeHistory } = useHistory(user.id);
   const [topic, setTopic]             = useState('');
   const [loading, setLoading]         = useState(false);
@@ -138,6 +138,16 @@ export default function ResearchPage({ user, logout }: Props) {
 
   const Sidebar = (
     <div className="flex flex-col h-full">
+      {/* Brand Logo */}
+      <div className="flex items-center gap-2.5 px-4 py-4 border-b border-bdr cursor-pointer hover:bg-white/3 transition-colors flex-shrink-0" onClick={() => onNavigate('home')}>
+        <div className="w-8 h-8 rounded-lg bg-sage/10 border border-sage/25 flex items-center justify-center text-sage flex-shrink-0">
+          <LayersIcon size={16}/>
+        </div>
+        <div>
+          <p className="font-serif text-sm text-txt leading-none">MultiAgent Research</p>
+          <p className="text-[10px] uppercase tracking-widest text-txt3 mt-0.5">Research Intelligence</p>
+        </div>
+      </div>
       {/* User */}
       <div className="flex items-center gap-2.5 px-4 py-3 border-b border-bdr flex-shrink-0">
         <div className="w-7 h-7 rounded-full bg-lav/10 border border-lav/20 flex items-center justify-center text-[11px] font-bold text-lav flex-shrink-0">
@@ -187,7 +197,7 @@ export default function ResearchPage({ user, logout }: Props) {
   );
 
   return (
-    <div className="flex h-screen pt-16 bg-bg overflow-y-auto overflow-x-hidden">
+    <div className="flex h-screen bg-bg overflow-hidden">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-64 flex-shrink-0 bg-bg2 border-r border-bdr">
         {Sidebar}
@@ -198,11 +208,11 @@ export default function ResearchPage({ user, logout }: Props) {
         {sidebarOpen && (
           <>
             <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-              className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={()=>setSidebarOpen(false)}/>
+              className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={()=>setSidebarOpen(false)}/>
             <motion.aside
               initial={{x:'-100%'}} animate={{x:0}} exit={{x:'-100%'}}
               transition={{type:'spring',stiffness:300,damping:30}}
-              className="fixed left-0 top-0 bottom-0 w-72 bg-bg2 border-r border-bdr z-40 flex flex-col md:hidden">
+              className="fixed left-0 top-0 bottom-0 w-72 bg-bg2 border-r border-bdr z-50 flex flex-col md:hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-bdr">
                 <span className="font-serif text-sm text-txt">Navigation</span>
                 <button onClick={()=>setSidebarOpen(false)} className="p-1 text-txt2 hover:text-txt"><XIcon size={16}/></button>
