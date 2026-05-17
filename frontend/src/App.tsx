@@ -5,6 +5,7 @@ import { useAuth } from './hooks';
 import AuthPage from './pages/AuthPage';
 import ResearchPage from './pages/ResearchPage';
 import LandingPage from './pages/LandingPage';
+import Navbar from './components/Navbar';
 
 function Loader() {
   return (
@@ -39,38 +40,41 @@ export default function App() {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {page === 'home' ? (
-        <motion.div key="home"
-          className="min-h-screen bg-bg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <LandingPage user={user} onNavigate={setPage} logout={handleLogout} />
-        </motion.div>
-      ) : page === 'auth' && !user ? (
-        <motion.div key="auth"
-          className="min-h-screen bg-bg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <AuthPage onLoginLocal={handleLoginLocal} />
-        </motion.div>
-      ) : (
-        <motion.div key="app"
-          className="min-h-screen bg-bg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <ResearchPage user={user!} logout={handleLogout} />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <>
+      <Navbar user={user} onNavigate={setPage} logout={handleLogout} showLinks={page === 'home'} />
+      <AnimatePresence mode="wait">
+        {page === 'home' ? (
+          <motion.div key="home"
+            className="min-h-screen bg-bg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <LandingPage user={user} onNavigate={setPage} logout={handleLogout} />
+          </motion.div>
+        ) : page === 'auth' && !user ? (
+          <motion.div key="auth"
+            className="min-h-screen bg-bg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <AuthPage onLoginLocal={handleLoginLocal} />
+          </motion.div>
+        ) : (
+          <motion.div key="app"
+            className="min-h-screen bg-bg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ResearchPage user={user!} logout={handleLogout} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
