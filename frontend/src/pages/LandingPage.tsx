@@ -13,8 +13,8 @@ export default function LandingPage({ user, onNavigate, logout }: Props) {
       {/* ── Floating Header/Navbar ──────────────────────────────────────── */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-bg/85 backdrop-blur-md border-b border-bdr">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => onNavigate('home')}>
-            <div className="w-10 h-10 rounded-lg bg-sage/10 border border-sage/25 flex items-center justify-center text-sage">
+          <div className="flex items-center gap-2.5 cursor-pointer flex-shrink-0" onClick={() => onNavigate('home')}>
+            <div className="w-10 h-10 rounded-lg bg-sage/10 border border-sage/25 flex items-center justify-center text-sage flex-shrink-0">
               <LayersIcon size={20}/>
             </div>
             <div>
@@ -29,7 +29,7 @@ export default function LandingPage({ user, onNavigate, logout }: Props) {
             <a href="#about" className="hover:text-sage transition-colors">Tech Stack</a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {user ? (
               <>
                 <button
@@ -40,7 +40,7 @@ export default function LandingPage({ user, onNavigate, logout }: Props) {
                 </button>
                 <button
                   onClick={logout}
-                  className="text-xs text-txt3 hover:text-txt2 transition-colors font-semibold"
+                  className="hidden sm:block text-xs text-txt3 hover:text-txt2 transition-colors font-semibold"
                 >
                   Sign Out
                 </button>
@@ -49,13 +49,13 @@ export default function LandingPage({ user, onNavigate, logout }: Props) {
               <>
                 <button
                   onClick={() => onNavigate('auth')}
-                  className="text-xs text-txt2 hover:text-txt transition-colors font-semibold px-2"
+                  className="hidden sm:block text-xs text-txt2 hover:text-txt transition-colors font-semibold px-2"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => onNavigate('auth')}
-                  className="btn-primary py-1.5 px-4 text-xs gap-1.5 shadow-sm"
+                  className="btn-primary py-1.5 px-3 sm:px-4 text-xs gap-1 sm:gap-1.5 shadow-sm"
                 >
                   Start Free <ArrowRight size={13}/>
                 </button>
