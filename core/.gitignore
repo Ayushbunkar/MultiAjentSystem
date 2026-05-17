@@ -1,0 +1,37 @@
+# Core Backend - Git Ignore Rules
+# Ignored python bytecode, caches, logs, and secrets
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Secrets and Local Environments
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local virtual environments (if initialized inside core)
+.venv/
+venv/
+env/
+ENV/
+
+# Logs and runtime files
+*.log
+logs/
+*.pid
+*.pid.lock
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db

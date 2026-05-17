@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-bg text-txt font-sans antialiased;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 20% 0%, rgba(143,170,148,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 100%, rgba(157,147,191,0.05) 0%, transparent 60%);
+  }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-sur2 rounded-full; }
+}
+
+@layer components {
+  .card {
+    @apply bg-sur border border-bdr rounded-xl shadow-card;
+  }
+  .input-base {
+    @apply w-full bg-black/30 border border-bdr rounded-lg px-4 py-2.5 text-txt text-sm
+           placeholder-txt3 outline-none transition-all duration-200
+           focus:border-sage/40 focus:ring-2 focus:ring-sage/10;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold
+           text-sage border border-sage/30 transition-all duration-200 cursor-pointer
+           bg-gradient-to-br from-sage/20 to-lav/15
+           hover:from-sage/30 hover:to-lav/25 hover:-translate-y-px hover:shadow-sm
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+           text-txt2 border border-bdr bg-transparent transition-all duration-200
+           hover:bg-white/5 hover:text-txt hover:border-bdr cursor-pointer
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border;
+  }
+  .step-dot { @apply w-1.5 h-1.5 rounded-full flex-shrink-0; }
+}
+
+/* Markdown prose overrides */
+.prose { @apply text-txt2; }
+.prose h1,.prose h2,.prose h3 { @apply font-serif text-txt font-normal; }
+.prose strong { @apply text-txt font-semibold; }
+.prose a { @apply text-sky underline underline-offset-2; }
+.prose code { @apply bg-black/30 border border-bdr rounded px-1.5 py-0.5 text-lav text-xs; }
+.prose blockquote { @apply border-l-2 border-sage/30 pl-4 text-txt3 not-italic; }
+.prose pre { @apply bg-black/40 border border-bdr rounded-lg p-4; }
