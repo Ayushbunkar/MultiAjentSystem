@@ -2,16 +2,16 @@
 
 A sophisticated multi-agent research system that combines search, scraping, writing, and criticism capabilities with a modern web interface built with FastAPI, HTML, and CSS.
 
-## 🎯 Features
+## Features
 
-- **🔍 Search Agent**: Searches the web for relevant information
-- **📄 Reader Agent**: Scrapes and extracts detailed content from URLs
-- **✍️ Writer Chain**: Generates comprehensive AI-powered reports
-- **🎭 Critic Chain**: Reviews and critiques the generated reports
-- **🌐 Web Interface**: Beautiful, responsive UI for easy interaction
-- **📥 Export Reports**: Download research reports as text files
+- **Search Agent**: Searches the web for relevant information
+- **Reader Agent**: Scrapes and extracts detailed content from URLs
+- **Writer Chain**: Generates comprehensive AI-powered reports
+- **Critic Chain**: Reviews and critiques the generated reports
+- **Web Interface**: Beautiful, responsive UI for easy interaction
+- **Export Reports**: Download research reports as text files
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Python 3.9+
 - FastAPI and Uvicorn
@@ -21,7 +21,7 @@ A sophisticated multi-agent research system that combines search, scraping, writ
   - `TAVILY_API_KEY` - For web search
   - `OPENAI_API_KEY` - (optional)
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### 1. Install Dependencies
 
@@ -43,7 +43,7 @@ TAVILY_API_KEY=your_tavily_api_key
 OPENAI_API_KEY=your_openai_api_key (optional)
 ```
 
-## 🎬 Running the Application
+## Running the Application
 
 ### Start the FastAPI Server
 
@@ -64,7 +64,7 @@ Open your browser and navigate to:
 http://localhost:8000
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 MultiAjentSystem/
@@ -80,7 +80,7 @@ MultiAjentSystem/
     └── script.js          # Frontend interactivity
 ```
 
-## 💻 Usage
+## Usage
 
 1. Enter a research topic in the search box
 2. Click "Start Research" button
@@ -91,7 +91,7 @@ MultiAjentSystem/
    - Reviews and critiques the report
 4. Download the full report or start a new research
 
-## 🔧 API Endpoints
+## API Endpoints
 
 ### Health Check
 ```
@@ -119,7 +119,7 @@ Response:
 }
 ```
 
-## 🎨 Frontend Features
+## Frontend Features
 
 - **Responsive Design**: Works on desktop and mobile devices
 - **Real-time Status**: Shows processing status for each step
@@ -127,7 +127,7 @@ Response:
 - **Export Functionality**: Download reports as text files
 - **Beautiful UI**: Gradient backgrounds and smooth animations
 
-## 🛠️ Customization
+## Customization
 
 ### Change Server Port
 Edit `app.py`:
@@ -150,7 +150,7 @@ Edit color variables in `static/style.css`:
 }
 ```
 
-## 📝 Example Research Topics
+## Example Research Topics
 
 - "Latest AI trends in 2024"
 - "Climate change impacts on global economy"
@@ -158,7 +158,7 @@ Edit color variables in `static/style.css`:
 - "Future of renewable energy"
 - "Cryptocurrency regulations worldwide"
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### "Module not found" errors
 ```bash
@@ -176,7 +176,7 @@ uv pip install --force-reinstall -r requirements.txt
 - Check internet connection
 - Ensure Tavily/Mistral services are accessible
 
-## 📚 Dependencies Overview
+## Dependencies Overview
 
 - **FastAPI**: Web framework
 - **Uvicorn**: ASGI server
@@ -185,15 +185,15 @@ uv pip install --force-reinstall -r requirements.txt
 - **BeautifulSoup4**: Web scraping
 - **Pydantic**: Data validation
 
-## 📄 License
+## License
 
 This project is open source and available under the MIT License.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Feel free to submit issues and enhancement requests.
 
-## ✨ Tips
+## Tips
 
 - Keep research topics specific for better results
 - Reports are usually generated within 30-60 seconds
@@ -202,4 +202,4 @@ Contributions are welcome! Feel free to submit issues and enhancement requests.
 
 ---
 
-**Happy Researching! 🚀**
+**Happy Researching!**

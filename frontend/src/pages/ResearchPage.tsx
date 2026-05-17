@@ -4,10 +4,10 @@ import { marked } from 'marked';
 import type { User } from '@supabase/supabase-js';
 import { useHistory } from '../hooks';
 import {
-  LayersIcon, GlobeIcon, LinkIcon, FileTextIcon, MsgIcon,
+  LayersIcon, GlobeIcon, LinkIcon, FileTextIcon,
   PlayIcon, DownloadIcon, TrashIcon, PlusIcon, LogOutIcon,
   MenuIcon, XIcon, ClockIcon, ZapIcon, HistoryIcon, CpuIcon, AlertIcon,
-  TAB_ICONS,
+  TAB_ICONS, ClipboardCheck
 } from '../icons';
 import { TABS, TAB_META, API, type TabKey, type StepStatus, type Results, type Statuses, type HistoryItem } from '../lib';
 
@@ -323,7 +323,7 @@ export default function ResearchPage({ user, logout }: Props) {
                   { label: 'Web search via Tavily', Icon: GlobeIcon, cls: 'text-sage' },
                   { label: 'Deep-scrape top source', Icon: LinkIcon, cls: 'text-sky' },
                   { label: 'AI report generation', Icon: FileTextIcon, cls: 'text-lav' },
-                  { label: 'Quality critique review', Icon: MsgIcon, cls: 'text-rose' },
+                  { label: 'Quality critique review', Icon: ClipboardCheck, cls: 'text-rose' },
                 ].map(({ label, Icon, cls }, i) => (
                   <div key={i} className="flex items-center gap-3 text-sm text-txt3">
                     <span className="w-6 h-6 rounded-md bg-sage/10 border border-sage/20 flex items-center justify-center text-[11px] font-bold text-sage flex-shrink-0">{i+1}</span>

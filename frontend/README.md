@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# MARS Frontend — React Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to the frontend of the Multi-Agent Research System (MARS). This is a highly polished, responsive web application built with React 19, TypeScript, Vite, and Tailwind CSS. It incorporates Framer Motion for state-driven micro-animations and Lucide React for professional system iconography.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Configure Environments
+Create a `.env` file in this directory:
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
+VITE_API_URL=http://localhost:8000
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 2. Install & Start
+```bash
+npm install
+npm run dev
 ```
+Open `http://localhost:5173` to interact with the interface.
+
+---
+
+## Key Directories & Modules
+
+- `/src/pages/`
+  - **[ResearchPage.tsx](file:///d:/Yash%20Coding/ai%20learning/MultiAjentSystem/frontend/src/pages/ResearchPage.tsx)**: Main dashboard. Orchestrates SSE pipeline streams, displays step-by-step real-time agent progression badges, handles tab views, and triggers markdown report exports.
+  - **[AuthPage.tsx](file:///d:/Yash%20Coding/ai%20learning/MultiAjentSystem/frontend/src/pages/AuthPage.tsx)**: Minimalist and beautiful login/signup forms hooked into Supabase Auth.
+- `/src/icons.tsx`
+  - Unified, modern exports utilizing Lucide React to ensure state-of-the-art icons across all UI modules.
+- `/src/hooks.ts`
+  - Contains unified history persistence hooks that seamlessly sync your search logs to the Supabase Database backend.
+- `tailwind.config.js`
+  - Customized with professional-grade color palettes: Sage (`#8FA294`), Lavender (`#B5A6C9`), Wheat (`#EED9B3`), and sleek dark UI surface styles.
+
+---
+
+## Features & Polish
+
+1. **SSE Streaming Indicators**: Dynamic loading dots blink when an agent is processing.
+2. **Glassmorphism Styling**: Card borders and text areas rely on subtle transparencies.
+3. **Responsive Mobile Drawers**: Seamless mobile navigation using spring transitions via Framer Motion.
+4. **Professional Icons**: Leverages Lucide Icons exclusively for clear, high-quality, modern representation across actions and navigation.
