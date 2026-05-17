@@ -10,23 +10,23 @@ An advanced, production-grade multi-agent research platform designed to orchestr
 graph TD
     User([User Input: Topic]) -->|SSE Stream Request| API[FastAPI Server]
     API -->|Orchestrates| Pipeline[Research Pipeline]
-    
+
     subgraph Agents [Collaborative Multi-Agent Network]
         Pipeline -->|1. Search query| Agent1[Search Agent: Llama 3.1 8B]
         Agent1 -->|Tavily API| Web[(Web Search Results)]
         Web -->|Snippets / Sources| Pipeline
-        
+
         Pipeline -->|2. Scrape Top Source| Agent2[Reader Agent: Llama 3.1 8B]
         Agent2 -->|Scraper Tool| WebContent[(Extracted Web Content)]
         WebContent -->|5-8 Key Bullet Points| Pipeline
-        
+
         Pipeline -->|3. Synthesize Report| Chain1[Writer Chain: Llama 3.3 70B]
         Chain1 -->|Structured Draft| Pipeline
-        
+
         Pipeline -->|4. Quality Critique| Chain2[Critic Chain: Llama 3.1 8B]
         Chain2 -->|Actionable Suggestions| Pipeline
     end
-    
+
     Pipeline -->|Real-time Agent Status & Data| API
     API -->|Server-Sent Events| Frontend[Vite React Frontend]
     Frontend -->|Persist History & Auth| Supabase[(Supabase DB)]
@@ -36,7 +36,7 @@ graph TD
 
 ## Key Features
 
-- **Specialized Multi-Tier LLM Architecture**: 
+- **Specialized Multi-Tier LLM Architecture**:
   - **Llama 3.1 8B-Instant** (~1,000 tokens/sec) powers the high-speed Search, Reader, and Critic agents.
   - **Llama 3.3 70B-Versatile** handles complex structure and synthesis for high-quality report writing.
 - **Streamed Agent Collaboration**: Utilizing Server-Sent Events (SSE), the backend streams agent thoughts, states, and completed datasets to the frontend in real time.
@@ -73,6 +73,7 @@ MultiAjentSystem/
 ## Setup & Installation
 
 ### Prerequisites
+
 - Python 3.9+
 - Node.js 18+
 - Supabase project
@@ -81,11 +82,13 @@ MultiAjentSystem/
 ---
 
 ### 1. Database Setup (Supabase)
+
 Run the commands inside [schema.sql](file:///d:/Yash%20Coding/ai%20learning/MultiAjentSystem/schema.sql) in your Supabase SQL Editor. This will provision the `research_history` table with proper row-level security (RLS) linked to Supabase auth.
 
 ---
 
 ### 2. Backend Setup
+
 Navigate to the `core/` directory:
 
 ```bash
@@ -93,6 +96,7 @@ cd core
 ```
 
 Create a `.env` file in `core/` (or the project root):
+
 ```env
 # LLM Providers (Groq is preferred, Mistral as fallback)
 GROQ_API_KEY=gsk_...
@@ -107,6 +111,7 @@ SUPABASE_ANON_KEY=eyJhbGci...
 ```
 
 Install Python dependencies:
+
 ```bash
 # Using virtual environment (recommended)
 python -m venv .venv
@@ -117,14 +122,17 @@ pip install -r requirements.txt
 ```
 
 Start the backend:
+
 ```bash
 python app.py
 ```
+
 The backend server runs on `http://localhost:8000`.
 
 ---
 
 ### 3. Frontend Setup
+
 Navigate to the `frontend/` directory:
 
 ```bash
@@ -132,6 +140,7 @@ cd ../frontend
 ```
 
 Create a `.env` file inside `frontend/`:
+
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGci...
@@ -139,14 +148,17 @@ VITE_API_URL=http://localhost:8000
 ```
 
 Install frontend packages:
+
 ```bash
 npm install
 ```
 
 Launch the development server:
+
 ```bash
 npm run dev
 ```
+
 Open `http://localhost:5173` in your browser to start researching!
 
 ---
@@ -177,4 +189,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-*Made by the MARS Team. Happy Researching!*
+_Made by the Ayush Bunkar. Happy Researching!_

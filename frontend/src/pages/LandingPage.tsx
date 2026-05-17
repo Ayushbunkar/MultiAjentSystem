@@ -6,7 +6,7 @@ interface Props {
   onNavigate: (page: 'home' | 'research' | 'auth') => void;
   logout: () => void;
 }
-
+// Landing page component
 export default function LandingPage({ user, onNavigate, logout }: Props) {
   return (
     <div className="min-h-screen bg-bg relative overflow-x-hidden">

@@ -7,6 +7,7 @@ import ResearchPage from './pages/ResearchPage';
 import LandingPage from './pages/LandingPage';
 import Navbar from './components/Navbar';
 
+// Loader component
 function Loader() {
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center gap-3 text-txt3 text-sm">
