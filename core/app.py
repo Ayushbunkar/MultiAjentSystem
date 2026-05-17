@@ -170,6 +170,17 @@ async def read_root():
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
+    path = os.path.join(_static_dir, "favicon.svg")
+    if os.path.isfile(path):
+        return FileResponse(path, media_type="image/svg+xml")
+    return Response(status_code=204)
+
+
+@app.get("/favicon.svg", include_in_schema=False)
+async def favicon_svg():
+    path = os.path.join(_static_dir, "favicon.svg")
+    if os.path.isfile(path):
+        return FileResponse(path, media_type="image/svg+xml")
     return Response(status_code=204)
 
 

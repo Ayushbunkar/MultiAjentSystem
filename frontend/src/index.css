@@ -5,13 +5,29 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg: #F9F9FC;
+    --bg2: #F0F2FA;
+    --sur: #FFFFFF;
+    --sur2: #F5E8E1;
+    --bdr: #E2E5F2;
+    --txt: #1E234A;
+    --txt2: #5D6388;
+    --txt3: #9299BA;
+    --sage: #A7ABDB;
+    --lav: #B2C0D3;
+    --rose: #F5C6C6;
+    --sky: #C6D1F9;
+    --wheat: #EFE4D3;
+  }
+
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
     @apply bg-bg text-txt font-sans antialiased;
     background-image:
-      radial-gradient(ellipse 60% 40% at 20% 0%, rgba(143,170,148,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 50% at 80% 100%, rgba(157,147,191,0.05) 0%, transparent 60%);
+      radial-gradient(ellipse 60% 40% at 20% 0%, rgba(167,171,219,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 100%, rgba(245,232,225,0.2) 0%, transparent 60%);
   }
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -23,21 +39,20 @@
     @apply bg-sur border border-bdr rounded-xl shadow-card;
   }
   .input-base {
-    @apply w-full bg-black/30 border border-bdr rounded-lg px-4 py-2.5 text-txt text-sm
+    @apply w-full bg-white border border-bdr rounded-lg px-4 py-2.5 text-txt text-sm
            placeholder-txt3 outline-none transition-all duration-200
-           focus:border-sage/40 focus:ring-2 focus:ring-sage/10;
+           focus:border-sage focus:ring-2 focus:ring-[#A7ABDB]/10;
   }
   .btn-primary {
     @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold
-           text-sage border border-sage/30 transition-all duration-200 cursor-pointer
-           bg-gradient-to-br from-sage/20 to-lav/15
-           hover:from-sage/30 hover:to-lav/25 hover:-translate-y-px hover:shadow-sm
+           text-white border border-transparent transition-all duration-200 cursor-pointer
+           bg-[#A7ABDB] hover:bg-[#9296C8] hover:-translate-y-px hover:shadow-sm
            disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
   }
   .btn-ghost {
     @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
            text-txt2 border border-bdr bg-transparent transition-all duration-200
-           hover:bg-white/5 hover:text-txt hover:border-bdr cursor-pointer
+           hover:bg-[#A7ABDB]/10 hover:text-txt cursor-pointer
            disabled:opacity-40 disabled:cursor-not-allowed;
   }
   .badge {
@@ -50,7 +65,7 @@
 .prose { @apply text-txt2; }
 .prose h1,.prose h2,.prose h3 { @apply font-serif text-txt font-normal; }
 .prose strong { @apply text-txt font-semibold; }
-.prose a { @apply text-sky underline underline-offset-2; }
-.prose code { @apply bg-black/30 border border-bdr rounded px-1.5 py-0.5 text-lav text-xs; }
-.prose blockquote { @apply border-l-2 border-sage/30 pl-4 text-txt3 not-italic; }
-.prose pre { @apply bg-black/40 border border-bdr rounded-lg p-4; }
+.prose a { @apply text-sage underline underline-offset-2; }
+.prose code { @apply bg-[#F0F2FA] border border-bdr rounded px-1.5 py-0.5 text-txt text-xs; }
+.prose blockquote { @apply border-l-2 border-[#A7ABDB]/50 pl-4 text-txt3 not-italic; }
+.prose pre { @apply bg-[#F0F2FA] border border-bdr rounded-lg p-4; }

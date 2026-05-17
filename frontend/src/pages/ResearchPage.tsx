@@ -140,12 +140,12 @@ export default function ResearchPage({ user, logout }: Props) {
     <div className="flex flex-col h-full">
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-4 py-4 border-b border-bdr flex-shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-sage/10 border border-sage/20 flex items-center justify-center text-sage flex-shrink-0">
-          <LayersIcon size={16}/>
+        <div className="w-10 h-10 rounded-lg bg-sage/10 border border-sage/20 flex items-center justify-center text-sage flex-shrink-0">
+          <LayersIcon size={20}/>
         </div>
         <div>
-          <p className="font-serif text-sm text-txt leading-tight">MultiAgent Research</p>
-          <p className="text-[9px] uppercase tracking-widest text-txt3">Research Intelligence</p>
+          <p className="font-serif text-lg text-txt leading-tight">MultiAgent Research</p>
+          <p className="text-xs uppercase tracking-widest text-txt3 mt-0.5">Research Intelligence</p>
         </div>
       </div>
       {/* User */}
