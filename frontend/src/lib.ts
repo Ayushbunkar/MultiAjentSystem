@@ -42,4 +42,5 @@ export const TAB_META: Record<TabKey, { label: string; title: string }> = {
   feedback: { label: 'Critic Review', title: 'Quality Critique'},
 };
 
-export const API = import.meta.env.VITE_API_URL ?? '';
+const rawApi = import.meta.env.VITE_API_URL ?? '';
+export const API = rawApi.endsWith('/') ? rawApi.slice(0, -1) : rawApi;
