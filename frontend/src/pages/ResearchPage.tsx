@@ -224,26 +224,30 @@ export default function ResearchPage({ user, logout, onNavigate }: Props) {
       </AnimatePresence>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-bdr bg-bg2 flex-shrink-0">
+        <div className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-bdr bg-bg2 flex-shrink-0 min-h-[57px] ${!showResults ? 'md:hidden' : ''}`}>
           <button onClick={()=>setSidebarOpen(true)} className="md:hidden p-1.5 text-txt2 hover:text-txt hover:bg-white/5 rounded-lg">
             <MenuIcon size={18}/>
           </button>
-          <input
-            className="input-base flex-1 py-2.5"
-            placeholder="Enter a research topic…"
-            value={topic}
-            onChange={e=>setTopic(e.target.value)}
-            onKeyDown={e=>{ if(e.key==='Enter') run(); }}
-            disabled={loading}
-            maxLength={500}
-          />
-          <button className="btn-primary flex-shrink-0" onClick={run} disabled={loading}>
-            {loading
-              ? <><span className="w-3.5 h-3.5 border border-sage/30 border-t-sage rounded-full animate-spin"/><span className="hidden sm:inline">Running…</span></>
-              : <><PlayIcon size={13}/><span className="hidden sm:inline">Run Pipeline</span></>}
-          </button>
+          {showResults && (
+            <>
+              <input
+                className="input-base flex-1 min-w-0 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm"
+                placeholder="Enter a research topic…"
+                value={topic}
+                onChange={e=>setTopic(e.target.value)}
+                onKeyDown={e=>{ if(e.key==='Enter') run(); }}
+                disabled={loading}
+                maxLength={500}
+              />
+              <button className="btn-primary flex-shrink-0 px-3 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm" onClick={run} disabled={loading}>
+                {loading
+                  ? <><span className="w-3.5 h-3.5 border border-sage/30 border-t-sage rounded-full animate-spin"/><span className="hidden sm:inline">Running…</span></>
+                  : <><PlayIcon size={13}/><span className="hidden sm:inline">Run Pipeline</span></>}
+              </button>
+            </>
+          )}
         </div>
 
         {error && (
@@ -267,13 +271,13 @@ export default function ResearchPage({ user, logout, onNavigate }: Props) {
               )}
 
               {/* Tab nav */}
-              <div className="flex gap-1 overflow-x-auto pb-px">
+              <div className="flex gap-1 overflow-x-auto pb-px scrollbar-thin">
                 {TABS.map(tab => {
                   const Icon = TAB_ICONS[tab];
                   return (
                     <button key={tab}
                       onClick={()=>setActiveTab(tab)}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl border border-b-0 text-xs font-medium transition-all whitespace-nowrap flex-shrink-0
+                      className={`flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-t-xl border border-b-0 text-xs font-medium transition-all whitespace-nowrap flex-shrink-0
                         ${activeTab===tab ? 'bg-sur border-bdr text-txt' : 'bg-transparent border-transparent text-txt2 hover:text-txt hover:bg-white/3'}`}>
                       <Icon size={12}/>
                       {TAB_META[tab].label}
@@ -291,21 +295,21 @@ export default function ResearchPage({ user, logout, onNavigate }: Props) {
                     transition={{ duration:0.2, ease:[0.22,1,0.36,1] }}
                     className="card rounded-tl-none overflow-hidden"
                   >
-                    <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-bdr flex-wrap">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center
+                    <div className="flex items-center justify-between gap-3 px-3 sm:px-5 py-3 sm:py-4 border-b border-bdr flex-wrap">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0
                           ${tab==='search' ? 'bg-sage/8 border-sage/20 text-sage' : tab==='scrape' ? 'bg-sky/8 border-sky/20 text-sky' : tab==='report' ? 'bg-lav/8 border-lav/20 text-lav' : 'bg-rose/8 border-rose/20 text-rose'}`}>
                           {(() => { const Icon = TAB_ICONS[tab]; return <Icon size={14}/>; })()}
                         </div>
-                        <h2 className="font-serif text-base text-txt">{TAB_META[tab].title}</h2>
+                        <h2 className="font-serif text-sm sm:text-base text-txt">{TAB_META[tab].title}</h2>
                       </div>
                       <span className={`badge ${badgeCls[statuses[tab]]}`}>{badgeLbl[statuses[tab]]}</span>
                     </div>
-                    <div className="px-5 py-5 min-h-[200px]">
+                    <div className="px-3 sm:px-5 py-4 sm:py-5 min-h-[200px]">
                       {statuses[tab] === 'processing' && (
                         <div className="flex items-center gap-3 text-wheat text-sm py-4">
-                          <span className="w-4 h-4 border border-wheat/20 border-t-wheat rounded-full animate-spin"/>
-                          Agent is working…
+                           <span className="w-4 h-4 border border-wheat/20 border-t-wheat rounded-full animate-spin"/>
+                           Agent is working…
                         </div>
                       )}
                       {statuses[tab] !== 'processing' && results[tab] && (
@@ -322,21 +326,44 @@ export default function ResearchPage({ user, logout, onNavigate }: Props) {
           ) : (
             /* Empty state */
             <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{delay:0.1,duration:0.4}}
-              className="flex-1 flex flex-col items-center justify-center p-10 text-center min-h-full gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-sage/10 border border-sage/20 flex items-center justify-center text-sage mb-2">
+              className="flex-1 flex flex-col items-center justify-center p-4 sm:p-10 text-center min-h-full gap-3">
+              <div className="w-14 h-14 rounded-2xl bg-sage/10 border border-sage/20 flex items-center justify-center text-sage mb-1 sm:mb-2">
                 <CpuIcon size={24}/>
               </div>
-              <h2 className="font-serif text-3xl text-txt">Start your research</h2>
-              <p className="text-txt3 text-sm max-w-xs leading-relaxed">Enter any topic above and watch 4 AI agents collaborate in real time to deliver a structured report.</p>
-              <div className="flex flex-col gap-2.5 mt-4 text-left w-full max-w-xs">
+              <h2 className="font-serif text-2xl sm:text-3xl text-txt">Start your research</h2>
+              <p className="text-txt3 text-xs sm:text-sm max-w-xs leading-relaxed">Enter any topic below and watch 4 AI agents collaborate in real time to deliver a structured report.</p>
+              
+              {/* Centered Search Bar */}
+              <div className="w-full max-w-lg mt-3 mb-2 flex items-center gap-2 p-1.5 bg-white border border-bdr rounded-xl shadow-sm focus-within:border-sage focus-within:ring-2 focus-within:ring-[#A7ABDB]/10 transition-all duration-200">
+                <input
+                  className="w-full bg-transparent border-0 px-3 py-2 text-sm placeholder-txt3 outline-none text-txt"
+                  placeholder="Enter a research topic…"
+                  value={topic}
+                  onChange={e=>setTopic(e.target.value)}
+                  onKeyDown={e=>{ if(e.key==='Enter') run(); }}
+                  disabled={loading}
+                  maxLength={500}
+                />
+                <button 
+                  className="btn-primary flex-shrink-0 px-4 py-2 text-xs sm:text-sm" 
+                  onClick={run} 
+                  disabled={loading || !topic.trim()}
+                >
+                  {loading
+                    ? <><span className="w-3.5 h-3.5 border border-sage/30 border-t-sage rounded-full animate-spin"/><span className="hidden sm:inline">Running…</span></>
+                    : <><PlayIcon size={13}/><span className="hidden sm:inline">Run Pipeline</span></>}
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:gap-2.5 mt-4 text-left w-full max-w-xs">
                 {[
                   { label: 'Web search via Tavily', Icon: GlobeIcon, cls: 'text-sage' },
                   { label: 'Deep-scrape top source', Icon: LinkIcon, cls: 'text-sky' },
                   { label: 'AI report generation', Icon: FileTextIcon, cls: 'text-lav' },
                   { label: 'Quality critique review', Icon: ClipboardCheck, cls: 'text-rose' },
                 ].map(({ label, Icon, cls }, i) => (
-                  <div key={i} className="flex items-center gap-3 text-sm text-txt3">
-                    <span className="w-6 h-6 rounded-md bg-sage/10 border border-sage/20 flex items-center justify-center text-[11px] font-bold text-sage flex-shrink-0">{i+1}</span>
+                  <div key={i} className="flex items-center gap-3 text-xs sm:text-sm text-txt3">
+                    <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-sage/10 border border-sage/20 flex items-center justify-center text-[10px] sm:text-[11px] font-bold text-sage flex-shrink-0">{i+1}</span>
                     <span className={`${cls} flex-shrink-0`}><Icon size={13}/></span>
                     {label}
                   </div>
