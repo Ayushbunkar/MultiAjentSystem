@@ -191,7 +191,7 @@ async def _sse_pipeline(topic: str) -> AsyncIterator[str]:
     Event schema: {"step": str, "status": str, "data": str}
     """
     from pipeline import (
-        _stage_search, _stage_scrape,
+        _stage_search_and_scrape,
         _stage_write,  _stage_critique,
         MAX_RESEARCH_CHARS,
     )
@@ -215,10 +215,7 @@ async def _sse_pipeline(topic: str) -> AsyncIterator[str]:
         yield _event("search",  "processing")
         yield _event("scrape",  "processing")
 
-        search_result, scrape_result = await asyncio.gather(
-            _stage_search(topic),
-            _stage_scrape(topic, f"Search for a top URL about: {topic}"),
-        )
+        search_result, scrape_result = await _stage_search_and_scrape(topic)
 
         yield _event("search", "complete", search_result)
         yield _event("scrape", "complete", scrape_result)

@@ -43,9 +43,9 @@ def _get_llm(fast: bool = True) -> Any:
     if groq_key:
         from langchain_groq import ChatGroq
         model_id = _GROQ_FAST_MODEL if fast else _GROQ_WRITE_MODEL
-        # Token caps: 512 for fast (search/critic don't need verbose),
-        # 1200 for writer (needs room for a structured report).
-        max_tok = 512 if fast else 1200
+        # Token caps: 768 for fast (search/critic don't need verbose),
+        # 2048 for writer (needs room for a detailed structured report).
+        max_tok = 768 if fast else 2048
         return ChatGroq(
             api_key=groq_key,
             model=model_id,
@@ -60,7 +60,7 @@ def _get_llm(fast: bool = True) -> Any:
             api_key=mistral_key,
             model="mistral-small-latest",
             temperature=0.2,
-            max_tokens=768 if fast else 1200,
+            max_tokens=768 if fast else 2048,
         )
 
     raise RuntimeError(
@@ -92,12 +92,16 @@ def build_search_agent():
 
     prompt = ChatPromptTemplate.from_messages([
         ("system",
-         "You are a fast research agent. "
-         "Use web_search to find info. Only use web_scrape if search snippets are insufficient.\n"
-         "Rules:\n"
-         "• Be concise — return bullet points with URLs.\n"
-         "• Stop as soon as you have 3+ reliable sources.\n"
-         "• Never repeat the same search query."),
+         "You are an elite, highly-optimized research agent. "
+         "Your goal is to rapidly locate reliable, authoritative information. "
+         "Use web_search to find information. Use web_scrape ONLY if search snippets are insufficient.\n\n"
+         "STRICT RULES FOR TOKEN EFFICIENCY AND SPEED:\n"
+         "1. BE CONCISE. Do not add filler text or introductory sentences.\n"
+         "2. Return your findings as a strict list of 3-5 high-density bullet points.\n"
+         "3. Include the source URL for each finding.\n"
+         "4. STOP executing immediately once you have 3 reliable sources.\n"
+         "5. Never repeat the same search query. Pivot keywords if needed.\n"
+         "6. Only extract the core facts relevant to the query."),
         ("human", "{input}"),
         ("placeholder", "{agent_scratchpad}"),
     ])
@@ -129,8 +133,12 @@ def build_reader_agent():
 
     prompt = ChatPromptTemplate.from_messages([
         ("system",
-         "You are a content extraction agent. Scrape the given URL and return "
-         "only the key facts in 5–8 bullet points. Be concise. Skip ads, navigation, footers."),
+         "You are a specialized content extraction agent. Your purpose is to deep-dive into a specific URL and extract the maximum amount of relevant factual information, while minimizing token usage.\n\n"
+         "STRICT EXTRACTION PROTOCOL:\n"
+         "1. Scrape the URL and distill it into exactly 5-8 highly informative, data-rich bullet points.\n"
+         "2. Ignore all UI elements, ads, navigation menus, and boilerplate text.\n"
+         "3. Prioritize numbers, statistics, definitive claims, and core arguments.\n"
+         "4. Output ONLY the bullet points. No preamble, no postscript."),
         ("human", "{input}"),
         ("placeholder", "{agent_scratchpad}"),
     ])
@@ -149,17 +157,30 @@ def build_reader_agent():
 # ── Writer chain ──────────────────────────────────────────────────────────────
 _WRITER_PROMPT = ChatPromptTemplate.from_messages([
     ("system",
-     "You are a precise technical writer. Write clearly and concisely. "
-     "Do not pad content. Use Markdown headers exactly as specified."),
-    ("human",
-     "Write a research report on: {topic}\n\n"
-     "Research material:\n{research}\n\n"
-     "Required format (strict):\n"
-     "## Introduction\n"
+     "You are an expert technical writer and industry analyst. Your objective is to synthesize raw research data into a comprehensive, highly professional, and perfectly structured Markdown report.\n\n"
+     "WRITING GUIDELINES:\n"
+     "1. Use an authoritative, objective, and analytical tone.\n"
+     "2. Synthesize information logically; do not merely list facts. Group related ideas together.\n"
+     "3. Do NOT hallucinate. Rely strictly on the provided research material.\n"
+     "4. Avoid fluff, filler words, or repetitive phrasing. Maximize information density.\n"
+     "5. Output ONLY the Markdown report. Do not include conversational text.\n\n"
+     "STRICT REQUIRED FORMAT:\n"
+     "# [Comprehensive Title]\n\n"
+     "## Executive Summary\n"
+     "[1-2 paragraphs summarizing the core topic and primary conclusions]\n\n"
      "## Key Findings\n"
-     "- Finding 1\n- Finding 2\n- Finding 3\n"
-     "## Conclusion\n"
-     "## Sources\n"),
+     "### [Sub-topic 1]\n"
+     "- [Detailed finding with context]\n"
+     "### [Sub-topic 2]\n"
+     "- [Detailed finding with context]\n\n"
+     "## Analytical Conclusion\n"
+     "[Final synthesis and implications of the findings]\n\n"
+     "## References\n"
+     "[List of sources used, properly formatted]\n"),
+    ("human",
+     "Write a detailed research report on: {topic}\n\n"
+     "Research material provided from previous agents:\n{research}\n\n"
+     "Remember to strictly follow the required formatting and maximize the depth of the content while remaining concise."),
 ])
 
 
@@ -171,10 +192,14 @@ def get_writer_chain():
 # ── Critic chain ──────────────────────────────────────────────────────────────
 _CRITIC_PROMPT = ChatPromptTemplate.from_messages([
     ("system",
-     "You are a strict research critic. Provide 3–5 specific, actionable "
-     "improvement suggestions. Do not include any introductory sentences, conversational preamble, "
-     "greetings, or filler text (such as 'Here are improvement suggestions...'). "
-     "Start directly with the first concrete critique/suggestion. Format using clear markdown bullet points."),
+     "You are a rigorous, uncompromising research critic and editor. Your job is to analyze the generated report and provide highly specific, actionable feedback to improve its quality, accuracy, and formatting.\n\n"
+     "CRITIQUE PROTOCOL (MAX 5 POINTS):\n"
+     "1. Identify gaps in logic, missing context, or weak arguments.\n"
+     "2. Point out any deviations from the required Markdown structure.\n"
+     "3. Highlight repetitive text or 'fluff' that should be removed.\n"
+     "4. DO NOT provide any conversational preamble (e.g., 'Here are my thoughts:').\n"
+     "5. Start immediately with the first concrete bullet point.\n"
+     "6. Use clear, direct language. Example: '- The Executive Summary lacks a definitive conclusion.'"),
     ("human",
      "Review this research report and give improvement suggestions:\n\n{report}"),
 ])

@@ -182,6 +182,20 @@ def web_search(query: str) -> str:
     return output
 
 
+def web_search_urls(query: str, max_results: int = 3) -> list[str]:
+    """Returns top URLs from a search query for concurrent RAG scraping."""
+    try:
+        response = _get_tavily().search(
+            query=query,
+            max_results=max_results,
+            search_depth="basic",
+        )
+        results = response.get("results", []) if isinstance(response, dict) else []
+        return [r.get("url") for r in results if r.get("url")]
+    except Exception:
+        return []
+
+
 @tool(args_schema=ScrapeInput)
 def web_scrape(url: str) -> str:
     """Fetch a URL and return clean, readable text (max 2000 chars)."""

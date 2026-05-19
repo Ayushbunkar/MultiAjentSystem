@@ -39,42 +39,40 @@ async def _in_thread(fn, *args, **kwargs) -> Any:
 
 
 # ── Stage implementations ─────────────────────────────────────────────────────
-async def _stage_search(topic: str) -> str:
-    """Stage 1a: Use the search agent to find top results."""
+async def _stage_search_and_scrape(topic: str) -> tuple[str, str]:
+    """Advanced RAG Stage 1: Direct Search + Concurrent Multi-URL Scrape"""
     try:
-        from agents import build_search_agent
-        agent = build_search_agent()
-        result = await _in_thread(
-            agent.invoke,
-            {"input": f"Find recent, reliable information about: {topic}"}
-        )
-        text = result.get("output", "") if isinstance(result, dict) else str(result)
-        return text.strip() or "No search results found."
+        from tools import web_search, web_search_urls, _async_scrape
+        
+        # 1. Search for snippets
+        search_result = await _in_thread(web_search.invoke, {"query": topic})
+        search_text = str(search_result)
+        
+        # 2. Get raw URLs and scrape them concurrently
+        urls = await _in_thread(web_search_urls, topic, 3)
+        
+        if not urls:
+            return search_text, "No URLs to scrape."
+            
+        # 3. Concurrently scrape top URLs
+        scrape_tasks = [_async_scrape(url, timeout=5.0) for url in urls]
+        scraped_texts = await asyncio.gather(*scrape_tasks, return_exceptions=True)
+        
+        # 4. Filter and combine scraped contents
+        valid_texts = []
+        for i, text in enumerate(scraped_texts):
+            if isinstance(text, Exception):
+                continue
+            text_str = str(text)
+            if text_str.strip() and not text_str.startswith("["):
+                # Limit each scrape to ~1500 chars to save tokens
+                valid_texts.append(f"Source {i+1} ({urls[i]}):\n{text_str[:1500]}")
+                
+        combined_scrape = "\n\n".join(valid_texts) or "Scraping yielded no valid content."
+        return search_text, combined_scrape
     except Exception as e:
-        logger.warning(f"Search stage failed: {e}")
-        return f"[Search unavailable: {e}]"
-
-
-async def _stage_scrape(topic: str, search_preview: str) -> str:
-    """Stage 1b: Use the reader agent to deep-scrape the best URL found."""
-    try:
-        from agents import build_reader_agent
-        agent = build_reader_agent()
-        result = await _in_thread(
-            agent.invoke,
-            {
-                "input": (
-                    f"Topic: '{topic}'.\n"
-                    f"From these search results, pick the most relevant URL and scrape it:\n"
-                    f"{search_preview}"
-                )
-            }
-        )
-        text = result.get("output", "") if isinstance(result, dict) else str(result)
-        return text.strip() or "No content scraped."
-    except Exception as e:
-        logger.warning(f"Scrape stage failed: {e}")
-        return f"[Scrape unavailable: {e}]"
+        logger.warning(f"Search and scrape stage failed: {e}")
+        return f"[Search unavailable: {e}]", f"[Scrape unavailable: {e}]"
 
 
 async def _stage_write(topic: str, research: str) -> str:
@@ -142,17 +140,7 @@ async def run_research_pipeline_async(topic: str) -> dict:
     logger.info(f"▶ Pipeline START | topic='{topic}'")
 
     # ── Stage 1: Parallel search + scrape ─────────────────────────────────────
-    # Scrape starts with a brief preview so both tasks can run concurrently.
-    # (search produces the proper preview, but scrape will still benefit from
-    #  running in parallel since scraping is I/O-bound independently.)
-    search_coro = _stage_search(topic)
-    # Seed scrape with just the topic until search completes (both start now)
-    scrape_seed  = f"Search for a top URL about: {topic}"
-    scrape_coro  = _stage_scrape(topic, scrape_seed)
-
-    search_result, scrape_result = await asyncio.gather(
-        search_coro, scrape_coro, return_exceptions=False
-    )
+    search_result, scrape_result = await _stage_search_and_scrape(topic)
 
     state["search_results"]  = search_result
     state["scraped_content"] = scrape_result
