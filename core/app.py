@@ -226,7 +226,14 @@ async def _sse_pipeline(topic: str) -> AsyncIterator[str]:
             f"SEARCH RESULTS:\n{search_result}\n\n"
             f"SCRAPED CONTENT:\n{scrape_result}"
         )
-        report = await _stage_write(topic, combined)
+        
+        from pipeline import _stream_write
+        report_parts = []
+        async for chunk in _stream_write(topic, combined):
+            report_parts.append(chunk)
+            yield _event("report_chunk", "streaming", chunk)
+            
+        report = "".join(report_parts)
         yield _event("report", "complete", report)
 
         # Stage 3: critique

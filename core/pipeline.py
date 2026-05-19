@@ -40,22 +40,55 @@ async def _in_thread(fn, *args, **kwargs) -> Any:
 
 # ── Stage implementations ─────────────────────────────────────────────────────
 async def _stage_search_and_scrape(topic: str) -> tuple[str, str]:
-    """Advanced RAG Stage 1: Direct Search + Concurrent Multi-URL Scrape"""
+    """Advanced RAG Stage 1: Query Expansion + Direct Search + Concurrent Multi-URL Scrape"""
     try:
         from tools import web_search, web_search_urls, _async_scrape
+        from agents import get_query_expansion_chain
         
-        # 1. Search for snippets
-        search_result = await _in_thread(web_search.invoke, {"query": topic})
-        search_text = str(search_result)
+        # 0. Query Expansion (HyDE/Diversity)
+        logger.info("Expanding queries...")
+        expand_chain = get_query_expansion_chain()
+        queries_text = await _in_thread(expand_chain.invoke, {"topic": topic})
+        queries = [q.strip() for q in queries_text.split("\n") if q.strip()][:3]
+        if not queries:
+            queries = [topic]
+            
+        search_text_parts = [f"Expanded Queries: {', '.join(queries)}"]
+        all_urls = []
         
-        # 2. Get raw URLs and scrape them concurrently
-        urls = await _in_thread(web_search_urls, topic, 3)
+        # 1. Search for snippets and URLs for all queries concurrently
+        search_tasks = [_in_thread(web_search.invoke, {"query": q}) for q in queries]
+        url_tasks = [_in_thread(web_search_urls, q, 2) for q in queries] # top 2 per query
         
-        if not urls:
+        search_results = await asyncio.gather(*search_tasks, return_exceptions=True)
+        url_results = await asyncio.gather(*url_tasks, return_exceptions=True)
+        
+        for sr in search_results:
+            if not isinstance(sr, Exception):
+                search_text_parts.append(str(sr))
+                
+        for ur in url_results:
+            if not isinstance(ur, Exception) and isinstance(ur, list):
+                all_urls.extend(ur)
+                
+        search_text = "\n\n".join(search_text_parts)
+        
+        # Deduplicate URLs while preserving order
+        seen = set()
+        unique_urls = []
+        for u in all_urls:
+            if u not in seen:
+                seen.add(u)
+                unique_urls.append(u)
+                
+        # Scrape top 4 diverse URLs
+        urls_to_scrape = unique_urls[:4]
+        
+        if not urls_to_scrape:
             return search_text, "No URLs to scrape."
             
         # 3. Concurrently scrape top URLs
-        scrape_tasks = [_async_scrape(url, timeout=5.0) for url in urls]
+        scrape_tasks = [_async_scrape(url, timeout=5.0) for url in urls_to_scrape]
         scraped_texts = await asyncio.gather(*scrape_tasks, return_exceptions=True)
         
         # 4. Filter and combine scraped contents
@@ -66,7 +99,7 @@ async def _stage_search_and_scrape(topic: str) -> tuple[str, str]:
             text_str = str(text)
             if text_str.strip() and not text_str.startswith("["):
                 # Limit each scrape to ~1500 chars to save tokens
-                valid_texts.append(f"Source {i+1} ({urls[i]}):\n{text_str[:1500]}")
+                valid_texts.append(f"Source {i+1} ({urls_to_scrape[i]}):\n{text_str[:1500]}")
                 
         combined_scrape = "\n\n".join(valid_texts) or "Scraping yielded no valid content."
         return search_text, combined_scrape
@@ -75,16 +108,22 @@ async def _stage_search_and_scrape(topic: str) -> tuple[str, str]:
         return f"[Search unavailable: {e}]", f"[Scrape unavailable: {e}]"
 
 
+async def _stream_write(topic: str, research: str):
+    """Stage 2: Yields chunks of a structured Markdown report from research material."""
+    from agents import get_writer_chain
+    chain = get_writer_chain()
+    async for chunk in chain.astream({"topic": topic, "research": research[:MAX_RESEARCH_CHARS]}):
+        yield chunk
+
+
 async def _stage_write(topic: str, research: str) -> str:
     """Stage 2: Write a structured Markdown report from research material."""
     try:
-        from agents import get_writer_chain
-        chain = get_writer_chain()
-        result = await _in_thread(
-            chain.invoke,
-            {"topic": topic, "research": research[:MAX_RESEARCH_CHARS]}
-        )
-        return (result or "").strip() or "Report generation returned empty."
+        parts = []
+        async for chunk in _stream_write(topic, research):
+            parts.append(chunk)
+        result = "".join(parts)
+        return result.strip() or "Report generation returned empty."
     except Exception as e:
         logger.warning(f"Writer stage failed: {e}")
         return f"[Writer unavailable: {e}]"

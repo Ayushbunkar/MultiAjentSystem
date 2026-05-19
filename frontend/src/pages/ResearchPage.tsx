@@ -92,6 +92,13 @@ export default function ResearchPage({ user, logout, onNavigate }: Props) {
         }
         if (step === 'error') { setError(data || 'Pipeline error.'); setLoading(false); stopStream(); return; }
         const key = step as TabKey;
+        if (step === 'report_chunk' && st === 'streaming') {
+          setResults(p => { const n = { ...p, report: p.report + data }; finalResults = n; return n; });
+          setStatuses(p => ({ ...p, report: 'processing' }));
+          setActiveTab('report');
+          return;
+        }
+        
         if (!TABS.includes(key)) return;
         const s: StepStatus = st==='complete' ? 'complete' : st==='error' ? 'error' : 'processing';
         setStatuses(p => ({ ...p, [key]: s }));
@@ -306,14 +313,20 @@ export default function ResearchPage({ user, logout, onNavigate }: Props) {
                       <span className={`badge ${badgeCls[statuses[tab]]}`}>{badgeLbl[statuses[tab]]}</span>
                     </div>
                     <div className="px-3 sm:px-5 py-4 sm:py-5 min-h-[200px]">
-                      {statuses[tab] === 'processing' && (
+                      {statuses[tab] === 'processing' && !results[tab] && (
                         <div className="flex items-center gap-3 text-wheat text-sm py-4">
                            <span className="w-4 h-4 border border-wheat/20 border-t-wheat rounded-full animate-spin"/>
                            Agent is working…
                         </div>
                       )}
-                      {statuses[tab] !== 'processing' && results[tab] && (
+                      {results[tab] && (
                         <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: richResults[tab] }}/>
+                      )}
+                      {statuses[tab] === 'processing' && results[tab] && (
+                        <div className="flex items-center gap-2 mt-4 text-wheat/80 text-xs italic">
+                           <span className="w-3 h-3 border border-wheat/20 border-t-wheat rounded-full animate-spin"/>
+                           Generating…
+                        </div>
                       )}
                       {statuses[tab] !== 'processing' && !results[tab] && (
                         <p className="text-txt3 text-sm italic">Awaiting pipeline execution…</p>
