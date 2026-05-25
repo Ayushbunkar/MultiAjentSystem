@@ -1,5 +1,5 @@
 """
-app.py — Optimized FastAPI server (v4).
+main.py — Optimized FastAPI server (v4).
 
 Improvements over v2:
   - asyncio.Lock for thread-safe in-memory cache
@@ -86,7 +86,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     _http_client = httpx.AsyncClient(timeout=10.0)
     logger.info("🔧 Warming up LLM tiers…")
     try:
-        from agents import _get_llm
+        from agent_modules.llm import _get_llm
         _get_llm(fast=True)   # cache llama-3.1-8b-instant
         _get_llm(fast=False)  # cache llama-3.3-70b-versatile
         logger.info("✅ Both LLM tiers cached")
@@ -326,7 +326,7 @@ async def health_check():
 
     # LLM — fast tier
     try:
-        from agents import _get_llm
+        from agent_modules.llm import _get_llm
         llm = _get_llm(fast=True)
         resp = await asyncio.to_thread(llm.invoke, "Reply: OK")
         checks["llm_fast"] = {"status": "ok", "model": "llama-3.1-8b-instant",
@@ -336,7 +336,7 @@ async def health_check():
 
     # LLM — write tier
     try:
-        from agents import _get_llm
+        from agent_modules.llm import _get_llm
         llm = _get_llm(fast=False)
         checks["llm_write"] = {"status": "ok", "model": "llama-3.3-70b-versatile"}
     except Exception as e:
@@ -397,7 +397,7 @@ async def get_config():
 # ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     uvicorn.run(
-        "app:app",
+        "main:app",
         host="0.0.0.0",
         port=8000,
         reload=False,

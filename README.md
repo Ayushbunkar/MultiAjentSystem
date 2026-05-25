@@ -51,11 +51,19 @@ graph TD
 
 ```text
 MultiAjentSystem/
+├── main.py               # ASGI entrypoint (exposes app)
 ├── core/                  # Backend Engine (Python, FastAPI)
-│   ├── app.py             # FastAPI App, SSE endpoints, Supabase Integration
-│   ├── agents.py          # Cached LangChain Agents & LLM tier setups
+│   ├── main.py            # FastAPI App, SSE endpoints, Supabase Integration
+│   ├── agent_modules/     # Modular agent components
+│   │   ├── llm.py          # LLM factory and model tiers
+│   │   ├── search.py       # Search agent
+│   │   ├── reader.py       # Reader agent
+│   │   ├── query.py        # Query expansion chain
+│   │   ├── writer.py       # Writer chain
+│   │   └── critic.py       # Critic chain
 │   ├── pipeline.py        # Pipeline orchestrator
 │   ├── tools.py           # Web Search (Tavily) & Web Scraper (BeautifulSoup)
+│   ├── main.py             # ASGI entrypoint (core)
 │   └── requirements.txt   # Python package dependencies
 ├── frontend/              # Web Client (React, Vite, TypeScript, Tailwind)
 │   ├── src/
@@ -124,7 +132,11 @@ pip install -r requirements.txt
 Start the backend:
 
 ```bash
-python app.py
+python main.py
+
+ASGI entrypoints (for gunicorn/uvicorn):
+- main:app
+- core.main:app
 ```
 
 The backend server runs on `http://localhost:8000`.

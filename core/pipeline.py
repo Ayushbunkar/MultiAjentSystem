@@ -43,7 +43,7 @@ async def _stage_search_and_scrape(topic: str) -> tuple[str, str]:
     """Advanced RAG Stage 1: Query Expansion + Direct Search + Concurrent Multi-URL Scrape"""
     try:
         from tools import web_search, web_search_urls, _async_scrape
-        from agents import get_query_expansion_chain
+        from agent_modules.query import get_query_expansion_chain
         
         # 0. Query Expansion (HyDE/Diversity)
         logger.info("Expanding queries...")
@@ -110,7 +110,7 @@ async def _stage_search_and_scrape(topic: str) -> tuple[str, str]:
 
 async def _stream_write(topic: str, research: str):
     """Stage 2: Yields chunks of a structured Markdown report from research material."""
-    from agents import get_writer_chain
+    from agent_modules.writer import get_writer_chain
     chain = get_writer_chain()
     async for chunk in chain.astream({"topic": topic, "research": research[:MAX_RESEARCH_CHARS]}):
         yield chunk
@@ -132,7 +132,7 @@ async def _stage_write(topic: str, research: str) -> str:
 async def _stage_critique(report: str) -> str:
     """Stage 3: Critique the report for quality improvements."""
     try:
-        from agents import get_critic_chain
+        from agent_modules.critic import get_critic_chain
         chain = get_critic_chain()
         result = await _in_thread(
             chain.invoke,

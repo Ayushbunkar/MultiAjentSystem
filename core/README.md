@@ -48,13 +48,17 @@ OPENAI_API_KEY=your_openai_api_key (optional)
 ### Start the FastAPI Server
 
 ```bash
-python app.py
+python main.py
+
+ASGI entrypoints (for gunicorn/uvicorn):
+- main:app
+- core.main:app
 ```
 
 Or using uvicorn directly:
 
 ```bash
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Access the Web Interface
@@ -68,16 +72,18 @@ http://localhost:8000
 
 ```
 MultiAjentSystem/
-├── app.py                 # FastAPI application
+├── main.py                # FastAPI application (core)
 ├── pipeline.py            # Research pipeline logic
-├── agents.py              # AI agent definitions
+├── agent_modules/         # Modular agent components
+│   ├── llm.py              # LLM factory and model tiers
+│   ├── search.py           # Search agent
+│   ├── reader.py           # Reader agent
+│   ├── query.py            # Query expansion chain
+│   ├── writer.py           # Writer chain
+│   └── critic.py           # Critic chain
 ├── tools.py               # Search and scraping tools
 ├── requirements.txt       # Python dependencies
-├── .env                   # Environment variables (create this)
-└── static/
-    ├── index.html         # Web interface
-    ├── style.css          # Styling
-    └── script.js          # Frontend interactivity
+└── .env                   # Environment variables (create this)
 ```
 
 ## Usage
@@ -130,7 +136,7 @@ Response:
 ## Customization
 
 ### Change Server Port
-Edit `app.py`:
+Edit `main.py`:
 ```python
 if __name__ == "__main__":
     import uvicorn
