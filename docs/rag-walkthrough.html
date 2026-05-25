@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RAG Walkthrough - Multi-Agent Research System</title>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #475569;
+      --accent: #2563eb;
+      --paper: #ffffff;
+      --bg: #eef2f7;
+      --line: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Georgia", "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    header {
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header .title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    header h1 {
+      font-family: "Trebuchet MS", "Verdana", sans-serif;
+      font-size: 20px;
+      margin: 0;
+      flex: 1;
+    }
+    header button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    main {
+      max-width: 980px;
+      margin: 24px auto 48px;
+      background: var(--paper);
+      padding: 28px 32px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+    }
+    h2 {
+      font-family: "Trebuchet MS", "Verdana", sans-serif;
+      font-size: 18px;
+      margin-top: 28px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+    h3 {
+      font-family: "Trebuchet MS", "Verdana", sans-serif;
+      font-size: 15px;
+      margin-top: 18px;
+    }
+    p { line-height: 1.6; }
+    ul, ol { padding-left: 20px; line-height: 1.6; }
+    code, pre {
+      font-family: "Consolas", "Courier New", monospace;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    pre { padding: 12px; overflow-x: auto; }
+    .note { color: var(--muted); font-size: 13px; }
+    .img-row { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .img-row img { width: 100%; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      text-align: left;
+      padding: 8px 10px;
+    }
+    th { background: #f1f5f9; }
+    .qa li { margin-bottom: 10px; }
+    .qa strong { display: inline-block; min-width: 22px; }
+    @media print {
+      header { display: none; }
+      body { background: #fff; }
+      main { box-shadow: none; border: none; margin: 0; padding: 0; }
+      a, button { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <h1>Multi-Agent Research System - RAG Walkthrough</h1>
+      <button onclick="window.print()">Download PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <p class="note">Date: 2026-05-25 | Backend version: 3.0.0</p>
+
+    <h2>How to use this doc</h2>
+    <ul>
+      <li>Use the end-to-end walkthrough to explain the system from entry point to output.</li>
+      <li>Use the SSE deep dive to explain real-time streaming and UI updates.</li>
+      <li>Use the query expansion and scraping deep dive to explain RAG behavior.</li>
+      <li>Use the questions section for practice (easy, medium, hard).</li>
+    </ul>
+
+    <h2>System maps (diagrams)</h2>
+    <div class="img-row">
+      <img src="assets/pipeline-flow.svg" alt="Pipeline flow" />
+      <img src="assets/sse-stream.svg" alt="SSE stream timeline" />
+      <img src="assets/hierarchy-diagram.svg" alt="Hierarchy diagram" />
+      <img src="assets/agent-modules.svg" alt="Agent modules layout" />
+      <img src="assets/latency-bars.svg" alt="Latency bars chart" />
+      <img src="assets/pipeline-timeline.svg" alt="Pipeline timing chart" />
+      <img src="assets/token-budget.svg" alt="Token budget chart" />
+    </div>
+
+    <h2>Module layout and entrypoints</h2>
+    <ul>
+      <li><strong>Agent modules</strong> live in core/agent_modules (llm, search, reader, query, writer, critic).</li>
+      <li><strong>ASGI entrypoints</strong>: main:app and core.main:app.</li>
+    </ul>
+
+    <h2>Real end-to-end walkthrough (example topic)</h2>
+    <p><strong>Example topic:</strong> Lithium iron phosphate batteries for grid storage (2024-2025)</p>
+    <ol>
+      <li><strong>Frontend opens stream</strong> - UI creates an EventSource to GET /api/research/stream and resets state.</li>
+      <li><strong>Backend accepts request</strong> - FastAPI validates topic and starts the SSE pipeline.</li>
+      <li><strong>Query expansion</strong> - Fast LLM generates 3 diversified search queries.</li>
+      <li><strong>Search + URL harvesting</strong> - Tavily search returns snippets and top URLs; URLs are deduped.</li>
+      <li><strong>Concurrent scraping</strong> - Up to 4 URLs are fetched and cleaned; each source is capped.</li>
+      <li><strong>Report generation</strong> - Writer chain streams report chunks to the UI.</li>
+      <li><strong>Critique</strong> - Critic chain returns actionable feedback.</li>
+      <li><strong>Done</strong> - SSE emits done; UI saves history.</li>
+    </ol>
+
+    <h2>API reference (backend)</h2>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>GET</td><td>/</td><td>Serve frontend or return a small JSON message.</td></tr>
+        <tr><td>GET</td><td>/api/research/stream</td><td>Run pipeline with real-time SSE updates.</td></tr>
+        <tr><td>POST</td><td>/api/research</td><td>Run pipeline and return JSON.</td></tr>
+        <tr><td>GET</td><td>/api/health</td><td>Check LLMs, Tavily key, internet, cache.</td></tr>
+        <tr><td>POST</td><td>/api/cache/clear</td><td>Clear in-memory result cache.</td></tr>
+        <tr><td>GET</td><td>/api/config</td><td>Expose public Supabase config.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>SSE event stream deep dive</h2>
+    <p><strong>Event schema</strong></p>
+    <pre>{
+  "step":   "search | scrape | report | report_chunk | feedback | cache | done | error",
+  "status": "processing | complete | streaming | error",
+  "data":   "string payload (may be empty)"
+}</pre>
+
+    <p><strong>Typical cache-miss sequence (illustrative)</strong></p>
+    <ul>
+      <li>search:processing</li>
+      <li>scrape:processing</li>
+      <li>search:complete</li>
+      <li>scrape:complete</li>
+      <li>report:processing</li>
+      <li>report_chunk:streaming (many times)</li>
+      <li>report:complete</li>
+      <li>feedback:processing</li>
+      <li>feedback:complete</li>
+      <li>done:complete ({"cached":false,"duration_ms":12345})</li>
+    </ul>
+
+    <p><strong>SSE example payloads</strong></p>
+    <pre>data: {"step":"search","status":"processing","data":""}
+
+data: {"step":"search","status":"complete","data":"..."}
+
+data: {"step":"report_chunk","status":"streaming","data":"# Title\n"}
+
+data: {"step":"done","status":"complete","data":"{\"cached\":false,\"duration_ms\":12345}"}</pre>
+
+    <h2>Query expansion + scraping deep dive</h2>
+    <ul>
+      <li><strong>Query expansion</strong> - fast LLM outputs 3 distinct query lines.</li>
+      <li><strong>Search</strong> - Tavily provides snippets and top URLs per query.</li>
+      <li><strong>Dedup</strong> - URLs are deduplicated while preserving order.</li>
+      <li><strong>Scrape</strong> - up to 4 URLs are fetched concurrently via httpx.</li>
+      <li><strong>Extract</strong> - content is taken from article or main when available.</li>
+      <li><strong>Cap</strong> - each source is capped to reduce tokens.</li>
+    </ul>
+
+    <h2>Practice questions and answers</h2>
+
+    <h3>Easy (30)</h3>
+    <ol class="qa">
+      <li><strong>Q:</strong> What is the main goal of this system? <strong>A:</strong> Turn a topic into a report using search, scrape, write, and critique.</li>
+      <li><strong>Q:</strong> Which backend framework is used? <strong>A:</strong> FastAPI.</li>
+      <li><strong>Q:</strong> Which frontend stack is used? <strong>A:</strong> React + Vite + TypeScript + Tailwind.</li>
+      <li><strong>Q:</strong> Which endpoint streams progress? <strong>A:</strong> GET /api/research/stream.</li>
+      <li><strong>Q:</strong> Which endpoint returns a single JSON response? <strong>A:</strong> POST /api/research.</li>
+      <li><strong>Q:</strong> What does SSE stand for? <strong>A:</strong> Server-Sent Events.</li>
+      <li><strong>Q:</strong> What does the writer chain output? <strong>A:</strong> A structured Markdown report.</li>
+      <li><strong>Q:</strong> Which service provides web search? <strong>A:</strong> Tavily.</li>
+      <li><strong>Q:</strong> What tool fetches and cleans page text? <strong>A:</strong> web_scrape in tools.py.</li>
+      <li><strong>Q:</strong> Where is the research pipeline defined? <strong>A:</strong> core/pipeline.py.</li>
+      <li><strong>Q:</strong> Where are LLM models configured? <strong>A:</strong> core/agent_modules/llm.py.</li>
+      <li><strong>Q:</strong> Which model tier writes the report? <strong>A:</strong> llama-3.3-70b-versatile (Groq) when configured.</li>
+      <li><strong>Q:</strong> Which model tier handles search and critique? <strong>A:</strong> llama-3.1-8b-instant.</li>
+      <li><strong>Q:</strong> What is stored in the result cache? <strong>A:</strong> search_results, scraped_content, report, feedback.</li>
+      <li><strong>Q:</strong> What is the cache TTL? <strong>A:</strong> 1 hour.</li>
+      <li><strong>Q:</strong> What does /api/health check? <strong>A:</strong> LLMs, Tavily key, internet, cache stats.</li>
+      <li><strong>Q:</strong> Where does the UI open the SSE connection? <strong>A:</strong> ResearchPage.tsx.</li>
+      <li><strong>Q:</strong> What happens if Supabase is not configured? <strong>A:</strong> Local mode uses localStorage.</li>
+      <li><strong>Q:</strong> What is the max topic length allowed? <strong>A:</strong> 500 characters.</li>
+      <li><strong>Q:</strong> Which SSE event carries streaming text? <strong>A:</strong> report_chunk.</li>
+      <li><strong>Q:</strong> What is the final SSE event? <strong>A:</strong> done with cached and duration_ms.</li>
+      <li><strong>Q:</strong> How is the cache key derived? <strong>A:</strong> MD5 of normalized topic.</li>
+      <li><strong>Q:</strong> How many search results are requested per query? <strong>A:</strong> 4.</li>
+      <li><strong>Q:</strong> How many expanded queries are used? <strong>A:</strong> Up to 3.</li>
+      <li><strong>Q:</strong> How many URLs are scraped? <strong>A:</strong> Up to 4.</li>
+      <li><strong>Q:</strong> Where is HTML content cleaned? <strong>A:</strong> _extract_text in tools.py.</li>
+      <li><strong>Q:</strong> What is the SSE response content type? <strong>A:</strong> text/event-stream.</li>
+      <li><strong>Q:</strong> Why add GZip middleware? <strong>A:</strong> Compress responses over 500 bytes.</li>
+      <li><strong>Q:</strong> What header is added for tracing? <strong>A:</strong> X-Request-ID.</li>
+      <li><strong>Q:</strong> Where is the Supabase client created? <strong>A:</strong> frontend/src/lib.ts.</li>
+    </ol>
+
+    <h3>Medium (30)</h3>
+    <ol class="qa">
+      <li><strong>Q:</strong> Describe the SSE flow for a cache miss. <strong>A:</strong> It emits search/scrape processing, then complete, report processing with report_chunk streaming, report complete, feedback processing/complete, then done with duration.</li>
+      <li><strong>Q:</strong> Why run search and scrape in parallel? <strong>A:</strong> Reduce latency by overlapping IO.</li>
+      <li><strong>Q:</strong> How does query expansion improve search? <strong>A:</strong> It generates diverse queries to widen coverage.</li>
+      <li><strong>Q:</strong> How are duplicate URLs removed? <strong>A:</strong> Using a seen set while preserving order.</li>
+      <li><strong>Q:</strong> Why cap research input to 4000 chars? <strong>A:</strong> Control token usage and latency.</li>
+      <li><strong>Q:</strong> Why cap critic input to 2000 chars? <strong>A:</strong> Save tokens while focusing on structure.</li>
+      <li><strong>Q:</strong> What is the difference between report_chunk and report events? <strong>A:</strong> report_chunk streams partial text; report is the final full report.</li>
+      <li><strong>Q:</strong> How does the UI decide which tab is active during streaming? <strong>A:</strong> It sets activeTab to report when report_chunk arrives or when a step completes.</li>
+      <li><strong>Q:</strong> What happens if the SSE stream errors? <strong>A:</strong> The UI shows an error banner, stops streaming, and resets loading state.</li>
+      <li><strong>Q:</strong> Why warm up LLMs in lifespan? <strong>A:</strong> Reduce first-request latency by caching model clients.</li>
+      <li><strong>Q:</strong> How does the backend avoid blocking the event loop with LangChain? <strong>A:</strong> It uses asyncio.to_thread or run_in_executor.</li>
+      <li><strong>Q:</strong> Why use separate LLM tiers for search vs writer? <strong>A:</strong> Fast model for speed, larger model for quality.</li>
+      <li><strong>Q:</strong> What data is stored in Supabase search_history? <strong>A:</strong> topic, search_results, scraped_content, report, feedback, user_id, created_at.</li>
+      <li><strong>Q:</strong> What triggers history save in the UI? <strong>A:</strong> The done event from SSE.</li>
+      <li><strong>Q:</strong> How does local mode store history? <strong>A:</strong> localStorage keyed by user id.</li>
+      <li><strong>Q:</strong> Why include Tavily direct answers? <strong>A:</strong> Provide concise summary and context.</li>
+      <li><strong>Q:</strong> How does the scraper select content region? <strong>A:</strong> It prefers article, main, or role=main elements.</li>
+      <li><strong>Q:</strong> Why rotate user agents? <strong>A:</strong> Reduce 403s and improve fetch success.</li>
+      <li><strong>Q:</strong> How is SSE caching handled? <strong>A:</strong> A cache hit emits cache and then completes immediately.</li>
+      <li><strong>Q:</strong> What is the purpose of the X-Accel-Buffering header? <strong>A:</strong> Prevent proxy buffering for real-time SSE.</li>
+      <li><strong>Q:</strong> How does the pipeline handle errors in a stage? <strong>A:</strong> It catches exceptions and returns placeholder text so the pipeline completes.</li>
+      <li><strong>Q:</strong> What is the effect of the GZip minimum size? <strong>A:</strong> Skip compression for very small responses.</li>
+      <li><strong>Q:</strong> Why limit each scraped source to 1500 chars? <strong>A:</strong> Reduce token load and improve write performance.</li>
+      <li><strong>Q:</strong> How does the UI render Markdown safely? <strong>A:</strong> It uses marked and inserts HTML; for untrusted content consider sanitizing.</li>
+      <li><strong>Q:</strong> What is the difference between /api/research and /api/research/stream for the UI? <strong>A:</strong> The stream provides live updates; JSON is a single response.</li>
+      <li><strong>Q:</strong> Why is cache max entries limited? <strong>A:</strong> Avoid unbounded memory use.</li>
+      <li><strong>Q:</strong> How does the pipeline choose how many URLs to scrape? <strong>A:</strong> It takes the first 4 unique URLs.</li>
+      <li><strong>Q:</strong> What is the role of _stream_write? <strong>A:</strong> Stream report chunks from the writer chain.</li>
+      <li><strong>Q:</strong> Why does critique strip preambles? <strong>A:</strong> Keep feedback concise and actionable.</li>
+      <li><strong>Q:</strong> What conditions make /api/health status degraded? <strong>A:</strong> Any check not ok or configured.</li>
+    </ol>
+
+    <h3>Hard (30)</h3>
+    <ol class="qa">
+      <li><strong>Q:</strong> If the search tool returns empty results, how should the pipeline behave and why? <strong>A:</strong> It should still proceed and generate a report using available context or return a clear fallback; this keeps the UX consistent.</li>
+      <li><strong>Q:</strong> What would break if you replaced SSE with WebSockets? <strong>A:</strong> The UI would need a different client, server code, and infrastructure; SSE is simpler for one-way streaming.</li>
+      <li><strong>Q:</strong> How would you prevent repeated scraping of identical URLs across users? <strong>A:</strong> Add a shared URL-level cache with TTL and normalized URL keys.</li>
+      <li><strong>Q:</strong> What is the risk of using localStorage for history in local mode? <strong>A:</strong> Data is per-browser and can be cleared; no cross-device sync.</li>
+      <li><strong>Q:</strong> Where are the main bottlenecks in the pipeline and how would you measure them? <strong>A:</strong> Search, scraping, and writing; measure with timing logs and tracing.</li>
+      <li><strong>Q:</strong> How does using run_in_executor affect throughput under load? <strong>A:</strong> It uses a thread pool; too many blocking tasks can exhaust threads.</li>
+      <li><strong>Q:</strong> Why not make web_scrape fully async as a tool? <strong>A:</strong> LangChain tools are sync; the wrapper avoids event loop conflicts.</li>
+      <li><strong>Q:</strong> How would you add source citations to the report? <strong>A:</strong> Pass URL list and snippets to the writer and require citations in the prompt.</li>
+      <li><strong>Q:</strong> What is the failure mode if Tavily API key is missing? <strong>A:</strong> Search errors; health check shows missing.</li>
+      <li><strong>Q:</strong> How can you reduce hallucinations in the writer? <strong>A:</strong> Tight prompts, lower temperature, include sources, add citations.</li>
+      <li><strong>Q:</strong> How would you test SSE streaming end-to-end? <strong>A:</strong> Use an SSE client, capture events, and assert order and final done event.</li>
+      <li><strong>Q:</strong> What is the effect of lowering MAX_RESEARCH_CHARS to 2000? <strong>A:</strong> Less context, faster but potentially lower report quality.</li>
+      <li><strong>Q:</strong> How does request ID middleware help debugging? <strong>A:</strong> It correlates logs across requests and services.</li>
+      <li><strong>Q:</strong> Why is cache keyed on normalized topic instead of raw? <strong>A:</strong> Avoid duplicate entries due to case or spacing.</li>
+      <li><strong>Q:</strong> What race conditions could occur in the result cache? <strong>A:</strong> Concurrent reads/writes; asyncio.Lock prevents them.</li>
+      <li><strong>Q:</strong> How would you implement per-user cache isolation? <strong>A:</strong> Include user id in the cache key and store per-user entries.</li>
+      <li><strong>Q:</strong> How can you avoid blocking on writer streaming if client disconnects? <strong>A:</strong> Check connection state and cancel tasks on disconnect.</li>
+      <li><strong>Q:</strong> Why is httpx.AsyncClient created once in lifespan? <strong>A:</strong> Reuse connections and reduce overhead.</li>
+      <li><strong>Q:</strong> What is the tradeoff of caching report outputs? <strong>A:</strong> Saves time but can serve stale data if the topic meaning shifts.</li>
+      <li><strong>Q:</strong> How would you add rate limiting to the API? <strong>A:</strong> Use middleware or a gateway with per-IP or per-user limits.</li>
+      <li><strong>Q:</strong> What risk exists in rendering Markdown to HTML directly? <strong>A:</strong> XSS if untrusted content; sanitize or restrict sources.</li>
+      <li><strong>Q:</strong> How does the pipeline avoid blocking the FastAPI event loop? <strong>A:</strong> It offloads blocking calls to threads.</li>
+      <li><strong>Q:</strong> What would you change to support multi-lingual queries? <strong>A:</strong> Adjust prompts, search language, and optionally a translation step.</li>
+      <li><strong>Q:</strong> How could you add a retry on scrape error policy? <strong>A:</strong> Retry with backoff and fallback URLs for transient errors.</li>
+      <li><strong>Q:</strong> What is the difference between cache TTL and cache max? <strong>A:</strong> TTL expires by time; max evicts oldest when full.</li>
+      <li><strong>Q:</strong> How would you store SSE progress in Supabase for later playback? <strong>A:</strong> Persist each event with timestamps and step IDs.</li>
+      <li><strong>Q:</strong> How can you detect and prevent duplicate done events? <strong>A:</strong> Track completion state per request and avoid double emits.</li>
+      <li><strong>Q:</strong> What is a safe way to expose public config to the frontend? <strong>A:</strong> Use anon keys only; never expose service role keys.</li>
+      <li><strong>Q:</strong> How would you make the pipeline resumable after a crash? <strong>A:</strong> Persist intermediate state and re-run remaining steps.</li>
+      <li><strong>Q:</strong> What is the impact of raising max_tokens for writer to 4096? <strong>A:</strong> More detail but slower and higher cost.</li>
+    </ol>
+  </main>
+</body>
+</html>

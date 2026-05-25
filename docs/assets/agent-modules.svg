@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="300" viewBox="0 0 980 300">
+  <style>
+    .box { fill:#f8fafc; stroke:#64748b; stroke-width:1.5; rx:8; }
+    .txt { font-family: Arial, sans-serif; font-size:12px; fill:#0f172a; }
+    .line { stroke:#64748b; stroke-width:1.5; }
+  </style>
+
+  <rect class="box" x="30" y="30" width="200" height="48" />
+  <text class="txt" x="130" y="58" text-anchor="middle">agents.py (compat)</text>
+
+  <rect class="box" x="300" y="30" width="200" height="48" />
+  <text class="txt" x="400" y="58" text-anchor="middle">agent_modules</text>
+
+  <line class="line" x1="230" y1="54" x2="300" y2="54" />
+
+  <rect class="box" x="60" y="130" width="140" height="36" />
+  <text class="txt" x="130" y="152" text-anchor="middle">llm.py</text>
+
+  <rect class="box" x="230" y="130" width="140" height="36" />
+  <text class="txt" x="300" y="152" text-anchor="middle">search.py</text>
+
+  <rect class="box" x="400" y="130" width="140" height="36" />
+  <text class="txt" x="470" y="152" text-anchor="middle">reader.py</text>
+
+  <rect class="box" x="570" y="130" width="140" height="36" />
+  <text class="txt" x="640" y="152" text-anchor="middle">query.py</text>
+
+  <rect class="box" x="230" y="190" width="140" height="36" />
+  <text class="txt" x="300" y="212" text-anchor="middle">writer.py</text>
+
+  <rect class="box" x="400" y="190" width="140" height="36" />
+  <text class="txt" x="470" y="212" text-anchor="middle">critic.py</text>
+
+  <line class="line" x1="400" y1="78" x2="130" y2="130" />
+  <line class="line" x1="400" y1="78" x2="300" y2="130" />
+  <line class="line" x1="400" y1="78" x2="470" y2="130" />
+  <line class="line" x1="400" y1="78" x2="640" y2="130" />
+  <line class="line" x1="400" y1="78" x2="300" y2="190" />
+  <line class="line" x1="400" y1="78" x2="470" y2="190" />
+</svg>
